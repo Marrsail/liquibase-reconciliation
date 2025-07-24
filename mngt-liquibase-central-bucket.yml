@@ -44,6 +44,9 @@ Resources:
               AWS:
                 - !Ref ExternalRole1Arn
                 - !Ref ExternalRole2Arn
+                - !Ref ExternalRole3Arn 
+                - !Ref ExternalRole4Arn
+                - !Ref ExternalRole5Arn
             Action:
               - "s3:GetObject"
               - "s3:ListBucket"
