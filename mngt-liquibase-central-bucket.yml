@@ -4,10 +4,19 @@ Description: Secure S3 bucket for centralized Liquibase changelog artifacts with
 Parameters:
   ExternalRole1Arn:
     Type: String
-    Description: ARN of IAM role in external account (e.g., Lambda role in Dev)
+    Description: ARN of IAM role in external account (Lambda role in Dev)
   ExternalRole2Arn:
     Type: String
-    Description: ARN of IAM role in another external account (e.g., Lambda role in Prod)
+    Description: ARN of IAM role in another external account (Lambda role in Int)
+ ExternalRole3Arn:
+    Type: String
+    Description: ARN of IAM role in another external account (Lambda role in UAT)    
+ExternalRole4Arn:
+    Type: String
+    Description: ARN of IAM role in another external account (Lambda role in Pre-Prod)  
+ExternalRole5Arn:
+    Type: String
+    Description: ARN of IAM role in another external account (Lambda role in Production)      
 
 Resources:
   LiquibaseArtifactBucket:
