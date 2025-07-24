@@ -1,22 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Secure S3 bucket for centralized Liquibase changelog artifacts with cross-account IAM Role access
+Description: S3 bucket for centralized Liquibase changelog artifacts with cross-account access for trusted AWS accounts
 
 Parameters:
-  ExternalRole1Arn:
+  DevAccountId:
     Type: String
-    Description: ARN of IAM role in external account (Lambda role in Dev)
-  ExternalRole2Arn:
+    Description: AWS Account ID for Dev environment
+  IntAccountId:
     Type: String
-    Description: ARN of IAM role in another external account (Lambda role in Int)
- ExternalRole3Arn:
+    Description: AWS Account ID for Int environment
+  UatAccountId:
     Type: String
-    Description: ARN of IAM role in another external account (Lambda role in UAT)    
-ExternalRole4Arn:
+    Description: AWS Account ID for UAT environment
+  PreAccountId:
     Type: String
-    Description: ARN of IAM role in another external account (Lambda role in Pre-Prod)  
-ExternalRole5Arn:
+    Description: AWS Account ID for Pre environment
+  ProdAccountId:
     Type: String
-    Description: ARN of IAM role in another external account (Lambda role in Production)      
+    Description: AWS Account ID for Production environment
 
 Resources:
   LiquibaseArtifactBucket:
@@ -38,25 +38,25 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Sid: AllowCrossAccountLambdaRolesToRead
+          - Sid: AllowReadFromTrustedAccounts
             Effect: Allow
             Principal:
               AWS:
-                - !Ref ExternalRole1Arn
-                - !Ref ExternalRole2Arn
-                - !Ref ExternalRole3Arn 
-                - !Ref ExternalRole4Arn
-                - !Ref ExternalRole5Arn
+                - !Sub "arn:aws:iam::${DevAccountId}:root"
+                - !Sub "arn:aws:iam::${IntAccountId}:root"
+                - !Sub "arn:aws:iam::${UatAccountId}:root"
+                - !Sub "arn:aws:iam::${PreAccountId}:root"
+                - !Sub "arn:aws:iam::${ProdAccountId}:root"
             Action:
               - "s3:GetObject"
               - "s3:ListBucket"
             Resource:
-              - !Sub "${LiquibaseArtifactBucket.Arn}"
+              - !GetAtt LiquibaseArtifactBucket.Arn
               - !Sub "${LiquibaseArtifactBucket.Arn}/*"
 
 Outputs:
   BucketName:
-    Description: Name of the secure S3 bucket for Liquibase artifacts
+    Description: Name of the Liquibase artifact bucket
     Value: !Ref LiquibaseArtifactBucket
 
   BucketArn:
