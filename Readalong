@@ -1,0 +1,62 @@
+# Liquibase Release Tagging & Deployment Process
+
+This document outlines the standardized process for tagging and releasing Liquibase changelogs using Git annotated tags, Semantic Versioning, and GitHub Releases.
+
+---
+
+## 🏷️ Tag Format
+
+We use [Semantic Versioning (SemVer)](https://semver.org/), with annotated Git tags:
+
+
+### Examples:
+- `v1.0.0` – First production-ready changelog release
+- `v1.2.1` – Minor changes (e.g., new tables or grants)
+- `v2.0.0` – Major changes or breaking modifications
+
+> ⚠️ **Use annotated tags only.** Avoid lightweight tags.
+
+---
+
+## ✍️ Creating an Annotated Tag
+
+```bash
+git tag -a v1.0.0 -m "Initial Liquibase changelog release"
+git push origin v1.0.0
+
+
+This will:
+	•	Tag the current commit
+	•	Push the tag to GitHub
+	•	(Once pipeline is configured) Trigger a GitHub Actions workflow
+
+⸻
+
+Tag Contents
+
+Each tag must point to a complete, deployable changelog package, including:
+	•	db.changelog-master.xml
+	•	All referenced changelog files (e.g., schema, roles, users, grants)
+	•	A flattened directory structure (no nested folders)
+
+⸻
+
+Post-Tag Action
+
+When a tag is pushed:
+	•	A GitHub Action will package the changelog files into a ZIP
+	•	The ZIP will be uploaded to an S3 bucket:
+
+s3://liquibase-artifacts-centralized/<tag>/vhb-liquibase.zip
+
+
+This makes the changelog available to Lambda functions or automated deployment systems in each environment
+
+Best Practices
+	•	Only tag when the changelog files are reviewed and approved
+	•	Keep changelog structure consistent (flattened, no nested folders)
+	•	Follow a changelog review and promotion process (Dev → UAT → Prod)
+
+⸻
+
+
