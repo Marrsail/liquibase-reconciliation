@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Secure S3 bucket for centralized Liquibase changelog artifacts with cross-account IAM Role access
+
+Parameters:
+  ExternalRole1Arn:
+    Type: String
+    Description: ARN of IAM role in external account (e.g., Lambda role in Dev)
+  ExternalRole2Arn:
+    Type: String
+    Description: ARN of IAM role in another external account (e.g., Lambda role in Prod)
+
+Resources:
+  LiquibaseArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: liquibase-artifacts-centralized
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  LiquibaseArtifactBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref LiquibaseArtifactBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCrossAccountLambdaRolesToRead
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Ref ExternalRole1Arn
+                - !Ref ExternalRole2Arn
+            Action:
+              - "s3:GetObject"
+              - "s3:ListBucket"
+            Resource:
+              - !Sub "${LiquibaseArtifactBucket.Arn}"
+              - !Sub "${LiquibaseArtifactBucket.Arn}/*"
+
+Outputs:
+  BucketName:
+    Description: Name of the secure S3 bucket for Liquibase artifacts
+    Value: !Ref LiquibaseArtifactBucket
+
+  BucketArn:
+    Description: ARN of the S3 bucket
+    Value: !GetAtt LiquibaseArtifactBucket.Arn
