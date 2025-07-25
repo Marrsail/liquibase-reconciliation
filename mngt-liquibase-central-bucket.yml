@@ -42,11 +42,11 @@ Resources:
             Effect: Allow
             Principal:
               AWS:
-                - !Sub "arn:aws:iam::${DevAccountId}:root"
-                - !Sub "arn:aws:iam::${IntAccountId}:root"
-                - !Sub "arn:aws:iam::${UatAccountId}:root"
-                - !Sub "arn:aws:iam::${PreAccountId}:root"
-                - !Sub "arn:aws:iam::${ProdAccountId}:root"
+                - !Sub "arn:aws-us-gov:iam::${152793237206}:root" #dev
+                - !Sub "arn:aws-us-gov:iam::${241797054725}:root" #int
+                - !Sub "arn:aws-us-gov:iam::${241797054725}:root" #uat
+                - !Sub "arn:aws-us-gov:iam::${306952153860}:root" #preprod
+                - !Sub "arn:aws-us-gov:iam::${306958713591}:root" #prod
             Action:
               - "s3:GetObject"
               - "s3:ListBucket"
@@ -115,11 +115,11 @@ Resources:
             Effect: Allow
             Principal:
               AWS:
-                - arn:aws:iam::111111111111:root  # Dev
-                - arn:aws:iam::222222222222:root  # Int
-                - arn:aws:iam::333333333333:root  # PreProd
-                - arn:aws:iam::444444444444:root  # Prod
-                - arn:aws:iam::555555555555:root  # Mgmt
+                - arn:aws-us-gov:iam::152793237206:root  # Dev
+                - arn:aws-us-gov:iam::241797054725:root # Int
+                - arn:aws-us-gov:iam::241797054725:root  # UAT
+                - arn:aws-us-gov:iam::306952153860:root  # PreProd
+                - arn:aws-us-gov:iam::306958713591:root  # Prod
             Action:
               - "s3:GetObject"
               - "s3:ListBucket"
