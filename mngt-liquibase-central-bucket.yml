@@ -62,3 +62,76 @@ Outputs:
   BucketArn:
     Description: ARN of the S3 bucket
     Value: !GetAtt LiquibaseArtifactBucket.Arn
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3 bucket for centralized Liquibase changelog artifacts with cross-account access for VHB AWS accounts
+
+Resources:
+  LiquibaseArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: liquibase-artifacts-centralized
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  LiquibaseArtifactBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref LiquibaseArtifactBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowReadFromVHBAccounts
+            Effect: Allow
+            Principal:
+              AWS:
+                - arn:aws:iam::111111111111:root  # Dev
+                - arn:aws:iam::222222222222:root  # Int
+                - arn:aws:iam::333333333333:root  # PreProd
+                - arn:aws:iam::444444444444:root  # Prod
+                - arn:aws:iam::555555555555:root  # Mgmt
+            Action:
+              - "s3:GetObject"
+              - "s3:ListBucket"
+            Resource:
+              - !GetAtt LiquibaseArtifactBucket.Arn
+              - !Sub "${LiquibaseArtifactBucket.Arn}/*"
+
+Outputs:
+  BucketName:
+    Description: Name of the Liquibase artifact bucket
+    Value: !Ref LiquibaseArtifactBucket
+
+  BucketArn:
+    Description: ARN of the S3 bucket
+    Value: !GetAtt LiquibaseArtifactBucket.Arn
