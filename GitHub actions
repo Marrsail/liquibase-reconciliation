@@ -3,7 +3,7 @@ name: Zip and Upload Liquibase Changelogs
 on:
   push:
     tags:
-      - 'v*'  # Matches tags like v1.0.0-dev
+      - 'v*'  # Matches SemVer standards
 
 jobs:
   zip-and-upload:
@@ -25,11 +25,11 @@ jobs:
           if [[ "$TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)-(dev|uat|int|preprod|prod)$ ]]; then
             VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
             ENV="${BASH_REMATCH[4]}"
-            echo "✔️ Valid SemVer tag: $TAG"
+            echo "Valid SemVer tag: $TAG"
             echo "VERSION=$VERSION" >> $GITHUB_ENV
             echo "ENV=$ENV" >> $GITHUB_ENV
           else
-            echo "❌ Invalid tag format. Use: vMAJOR.MINOR.PATCH-env (e.g., v1.2.3-dev)"
+            echo "Invalid tag format. Use: vMAJOR.MINOR.PATCH-env (e.g., v1.2.3-dev)"
             exit 1
           fi
 
