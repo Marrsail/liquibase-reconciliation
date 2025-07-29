@@ -1,0 +1,49 @@
+name: Zip and Upload Liquibase Changelogs
+
+on:
+  push:
+    tags:
+      - 'v*'  # Matches tags like v1.0.0-dev
+
+jobs:
+  zip-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure tags are included
+
+      - name: Extract and validate tag format
+        id: validate
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "TAG=$TAG" >> $GITHUB_ENV
+
+          # Validate SemVer with -env suffix: v1.0.0-dev
+          if [[ "$TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)-(dev|uat|int|preprod|prod)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+            ENV="${BASH_REMATCH[4]}"
+            echo "✔️ Valid SemVer tag: $TAG"
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+            echo "ENV=$ENV" >> $GITHUB_ENV
+          else
+            echo "❌ Invalid tag format. Use: vMAJOR.MINOR.PATCH-env (e.g., v1.2.3-dev)"
+            exit 1
+          fi
+
+      - name: Zip relevant files
+        run: |
+          echo "Zipping contents of changelogs/$ENV"
+          zip -j vhb-liquibase.zip changelogs/$ENV/* liquibase.properties
+
+      - name: Upload to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-gov-west-1  # Change if needed
+        run: |
+          BUCKET_NAME="vhb-liquibase-central-bucket"  # Update if needed
+          echo "Uploading to s3://$BUCKET_NAME/$TAG/vhb-liquibase.zip"
+          aws s3 cp vhb-liquibase.zip s3://$BUCKET_NAME/$TAG/vhb-liquibase.zip
