@@ -136,3 +136,39 @@
     </changeSet>
 
 </databaseChangeLog>
+
+
+
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="create-ddl-audit-table-${dms.schema}" author="marrsail.bailey">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = '${dms.schema}'
+            </sqlCheck>
+        </preConditions>
+
+        <createTable tableName="awsdms_ddl_audit" schemaName="${dms.schema}">
+            <column name="c_key" type="BIGSERIAL">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="c_time" type="TIMESTAMP"/>
+            <column name="c_user" type="VARCHAR(64)"/>
+            <column name="c_txn" type="VARCHAR(16)"/>
+            <column name="c_tag" type="VARCHAR(24)"/>
+            <column name="c_oid" type="INTEGER"/>
+            <column name="c_name" type="VARCHAR(64)"/>
+            <column name="c_schema" type="VARCHAR(64)"/>
+            <column name="c_ddlqry" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
