@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="create-ddl-audit-table-${dms.schema}" author="Marrsail.Bailey">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT 1 FROM information_schema.schemata WHERE schema_name = '${dms.schema}'
+            </sqlCheck>
+        </preConditions>
+        <createTable tableName="awsdms_ddl_audit" schemaName="${dms.schema}">
+            <column name="c_key" type="BIGSERIAL">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="c_time" type="TIMESTAMP"/>
+            <column name="c_user" type="VARCHAR(64)"/>
+            <column name="c_txn" type="VARCHAR(64)"/>
+            <column name="c_dml" type="VARCHAR(64)"/>
+            <column name="c_obj_id" type="INTEGER"/>
+            <column name="c_name" type="VARCHAR(64)"/>
+            <column name="c_schema" type="VARCHAR(64)"/>
+            <column name="c_ddlqry" type="TEXT"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
+
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="create-ddl-trigger-function-${dms.schema}" author="Marrsail.Bailey">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT 1 FROM information_schema.schemata WHERE schema_name = '${dms.schema}'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE OR REPLACE FUNCTION ${dms.schema}.awsdms_intercept_ddl()
+            RETURNS event_trigger
+            LANGUAGE plpgsql
+            SECURITY DEFINER
+            AS $$
+            DECLARE _qry text;
+            BEGIN
+              IF tg_tag = 'CREATE TABLE' OR tg_tag = 'ALTER TABLE' OR tg_tag = 'DROP TABLE' THEN
+                SELECT current_query() INTO _qry;
+                INSERT INTO ${dms.schema}.awsdms_ddl_audit (
+                  c_time, c_user, c_txn, c_dml, c_obj_id, c_name, c_schema, c_ddlqry
+                ) VALUES (
+                  CURRENT_TIMESTAMP, CURRENT_USER, txid_current(), tg_tag,
+                  TG_OBJECTID, TG_OBJECTNAME, TG_TABLE_SCHEMA, _qry
+                );
+              END IF;
+            END;
+            $$;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="create-ddl-event-trigger-${dms.schema}" author="mbailey">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT 1 FROM information_schema.schemata WHERE schema_name = '${dms.schema}'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE EVENT TRIGGER awsdms_intercept_ddl
+            ON ddl_command_end
+            EXECUTE PROCEDURE ${dms.schema}.awsdms_intercept_ddl();
+        </sql>
+    </changeSet>
+</databaseChangeLog>
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="grant-ddl-audit-access-${dms.schema}" author="mbailey">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT 1 FROM information_schema.tables 
+                WHERE table_schema = '${dms.schema}' AND table_name = 'awsdms_ddl_audit'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            GRANT ALL ON ${dms.schema}.awsdms_ddl_audit TO public;
+            GRANT ALL ON SEQUENCE ${dms.schema}.awsdms_ddl_audit_c_key_seq TO public;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
