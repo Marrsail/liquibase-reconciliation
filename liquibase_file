@@ -110,3 +110,21 @@
         </sql>
     </changeSet>
 </databaseChangeLog>
+
+
+
+
+
+
+
+
+<changeSet id="20250731-create-schema-awsdms_objects" author="mbailey">
+    <preConditions onFail="MARK_RAN">
+        <not>
+            <schemaExists schemaName="awsdms_objects"/>
+        </not>
+    </preConditions>
+    <sql>
+        CREATE SCHEMA awsdms_objects;
+    </sql>
+</changeSet>
