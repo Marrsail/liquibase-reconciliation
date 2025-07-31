@@ -186,3 +186,83 @@ jobs:
         run: |
           echo "Uploading to s3://${{ env.BUCKET_NAME }}/$TAG/vhb-liquibase.zip"
           aws s3 cp vhb-liquibase.zip s3://${{ env.BUCKET_NAME }}/$TAG/vhb-liquibase.zip
+
+
+
+
+
+
+
+
+
+
+
+name: Zip and Upload Liquibase Changelogs
+
+on:
+  push:
+    tags:
+      - 'v*'  # Matches SemVer standards
+
+jobs:
+  liquibase-zip-upload:
+    runs-on:
+      - self-hosted               # Self-hosted runner label
+      - ephemeral                 # Ephemeral ECS runner label
+      - EPMO-${{ github.event.repository.name }}  # Repository-specific label
+      - job-liquibase-zip-upload
+
+    env:
+      BUCKET_NAME: vhb-liquibase-artifact
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure tags are included
+
+      - name: Configure AWS Credentials - Assume Role
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-gov-west-1
+          role-to-assume: arn:aws-us-gov:iam::152793237206:role/project/project-vhb-ops-devops-perms-rCicdAssumeDeployment-kdr0D4jd9xV7
+          role-skip-session-tagging: true
+          role-session-name: GithubActionDeployment
+          output-credentials: true
+
+      - name: Configure AWS Credentials - Use Assumed Role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-gov-west-1
+          aws-access-key-id: ${{ steps.creds.outputs.aws-access-key-id }}
+          aws-secret-access-key: ${{ steps.creds.outputs.aws-secret-access-key }}
+          aws-session-token: ${{ steps.creds.outputs.aws-session-token }}
+
+      - name: Extract and validate tag format
+        id: validate
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "TAG=$TAG" >> $GITHUB_ENV
+
+          # Validate SemVer with suffix: v1.0.0
+          if [[ "$TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+            ENV="${BASH_REMATCH[4]}"
+            echo "Valid SemVer tag: $TAG"
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+            echo "ENV=$ENV" >> $GITHUB_ENV
+          else
+            echo "Invalid tag format. Use: vMAJOR.MINOR.PATCH-env (e.g., v1.2.3)"
+            exit 1
+          fi
+
+      - name: Zip relevant files
+        run: |
+          echo "Zipping contents of changelogs/$ENV"
+          zip -r vhb-liquibase.zip changelogs liquibase.properties
+
+      - name: Upload to S3
+        run: |
+          echo "Uploading to s3://${{ env.BUCKET_NAME }}/$TAG/vhb-liquibase.zip"
+          aws s3 cp vhb-liquibase.zip s3://${{ env.BUCKET_NAME }}/$TAG/vhb-liquibase.zip
