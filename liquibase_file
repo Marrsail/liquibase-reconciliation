@@ -245,3 +245,53 @@
     </changeSet>
 
 </databaseChangeLog>
+
+
+
+
+
+
+
+
+
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- v1: Original - failed due to AUTHORIZATION and user permissions -->
+    <!--
+    <changeSet id="20250731-create-schema-awsdms_objects" author="marrsail.bailey">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = 'awsdms_objects'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE SCHEMA awsdms_objects AUTHORIZATION analytics_reporting_postgres;
+        </sql>
+    </changeSet>
+    -->
+
+    <!-- v2: Creates schema without setting ownership -->
+    <changeSet id="20250731-create-schema-awsdms_objects-v2" author="marrsail.bailey">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = 'awsdms_objects'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE SCHEMA awsdms_objects;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
