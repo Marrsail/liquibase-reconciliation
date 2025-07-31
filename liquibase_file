@@ -423,3 +423,12 @@
 </changeSet>
 
 
+
+
+
+SELECT grantee, privilege_type
+FROM information_schema.role_table_grants
+WHERE table_schema = 'awsdms_objects'
+  AND table_name = 'awsdms_ddl_audit';
+
+
