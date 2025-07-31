@@ -295,3 +295,58 @@
     </changeSet>
 
 </databaseChangeLog>
+
+
+
+
+
+
+
+
+
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- V2 version of schema creation, updated to remove AUTHORIZATION clause -->
+
+    <changeSet id="20250731-create-schema-awsdms_objects-v2" author="marrsail.bailey">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM information_schema.schemata WHERE LOWER(schema_name) = 'awsdms_objects'
+                </sqlCheck>
+            </not>
+        </preConditions>
+
+        <comment>
+            Creating schema awsdms_objects. AUTHORIZATION clause omitted to allow default ownership by Liquibase deployment user.
+        </comment>
+
+        <sql>
+            CREATE SCHEMA awsdms_objects;
+        </sql>
+    </changeSet>
+
+    <!-- [Optional] If you want to track that the previous version was skipped, add a commented-out note here -->
+
+    <!--
+    <changeSet id="20250729-create-schema-awsdms_objects-v1" author="marrsail.bailey" runAlways="false" context="legacy" runOnChange="false" runInTransaction="false">
+        <comment>
+            DEPRECATED: Original version attempted to use AUTHORIZATION which failed due to least-privilege deployment user.
+            This has been replaced with version 2 above.
+        </comment>
+        <sql>
+            -- CREATE SCHEMA awsdms_objects AUTHORIZATION someuser;
+        </sql>
+    </changeSet>
+    -->
+
+</databaseChangeLog>
