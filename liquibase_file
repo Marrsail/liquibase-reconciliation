@@ -205,3 +205,43 @@
 
 
 </databaseChangeLog>
+
+
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Step 1: Create Schema -->
+    <changeSet id="20250731-01-create-awsdms_objects" author="marrsail.bailey">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM information_schema.schemata 
+                    WHERE schema_name = 'awsdms_objects'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE SCHEMA awsdms_objects;
+        </sql>
+    </changeSet>
+
+    <!-- Step 2: Assign Ownership to analytics_reporting_postgres -->
+    <changeSet id="20250731-02-assign-owner-awsdms_objects" author="marrsail.bailey">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM pg_roles WHERE rolname = 'analytics_reporting_postgres'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER SCHEMA awsdms_objects OWNER TO analytics_reporting_postgres;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
