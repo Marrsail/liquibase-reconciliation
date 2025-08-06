@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="20250806-create-user-etl_business_event" author="marrsail.bailey">
+        <sql>CREATE USER etl_business_event;</sql>
+    </changeSet>
+
+    <changeSet id="20250806-create-user-etl_business_service_log" author="marrsail.bailey">
+        <sql>CREATE USER etl_business_service_log;</sql>
+    </changeSet>
+
+    <changeSet id="20250806-create-user-etl_data_change_tracking" author="marrsail.bailey">
+        <sql>CREATE USER etl_data_change_tracking;</sql>
+    </changeSet>
+
+    <changeSet id="20250806-create-user-etl_document_management" author="marrsail.bailey">
+        <sql>CREATE USER etl_document_management;</sql>
+    </changeSet>
+
+    <changeSet id="20250806-create-user-etl_data_sync" author="marrsail.bailey">
+        <sql>CREATE USER etl_data_sync;</sql>
+    </changeSet>
+
+    <changeSet id="20250806-create-user-etl_print_and_mail" author="marrsail.bailey">
+        <sql>CREATE USER etl_print_and_mail;</sql>
+    </changeSet>
+
+    <changeSet id="20250806-create-user-app_sah_aws" author="marrsail.bailey">
+        <sql>CREATE USER app_sah_aws;</sql>
+    </changeSet>
+
+    <changeSet id="20250806-create-user-app_spr_aws" author="marrsail.bailey">
+        <sql>CREATE USER app_spr_aws;</sql>
+    </changeSet>
+
+</databaseChangeLog>
