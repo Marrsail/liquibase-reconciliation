@@ -1,0 +1,9 @@
+-- Connection info
+SELECT current_database() AS db,
+       inet_server_addr() AS host_ip,
+       inet_server_port() AS port;
+
+-- Check for vhb schema
+SELECT schema_name
+FROM information_schema.schemata
+WHERE schema_name = 'vhb';
